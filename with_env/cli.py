@@ -6,7 +6,15 @@ import dotenv
 
 
 def cli():
-    dotenv.load_dotenv()
+    has_set_anything = dotenv.load_dotenv(
+        ".env",
+        verbose=True,
+        override=True,
+        interpolate=False
+    )
+
+    if not has_set_anything:
+        print("with-env: .env not found", file=sys.stderr)
 
     argv = sys.argv[1:]
     program = argv[0]
@@ -16,4 +24,4 @@ def cli():
         print(f"{program}: not found")
         exit(1)
 
-    os.execv(program_path, argv)
+    os.execve(program_path, argv, os.environ)
