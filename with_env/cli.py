@@ -1,27 +1,25 @@
-import os
-import shutil
-import sys
+import click
 
-import dotenv
+from .execute import ProgramExecutor, RestartableProgramExecutor
+from .watch import FileObserver
 
 
-def cli():
-    has_set_anything = dotenv.load_dotenv(
+@click.command(context_settings={"allow_interspersed_args": False})
+@click.option("--watch", "-w", "watch_for_changes", is_flag=True, help="Watch for changes in the .env and restart the command.")
+@click.argument("argv", nargs=-1)
+def cli(
+    watch_for_changes: bool,
+    argv: list[str],
+):
+    env_files = [
         ".env",
-        verbose=True,
-        override=True,
-        interpolate=False
-    )
+    ]
 
-    if not has_set_anything:
-        print("with-env: .env not found", file=sys.stderr)
+    if watch_for_changes:
+        executor = RestartableProgramExecutor(argv, env_files)
+        observer = FileObserver(executor)
 
-    argv = sys.argv[1:]
-    program = argv[0]
-
-    program_path = shutil.which(program)
-    if program_path is None:
-        print(f"{program}: not found")
-        exit(1)
-
-    os.execve(program_path, argv, os.environ)
+        executor.start()
+        observer.run(env_files)
+    else:
+        ProgramExecutor(argv, env_files).start()
