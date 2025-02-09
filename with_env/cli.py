@@ -1,4 +1,5 @@
 import click
+import sys
 
 from .execute import ProgramExecutor, RestartableProgramExecutor
 from .watch import FileObserver
@@ -11,9 +12,20 @@ def cli(
     watch_for_changes: bool,
     argv: list[str],
 ):
-    env_files = [
+    env_files = set([
         ".env",
-    ]
+    ])
+
+    while len(argv) and argv[0].startswith(":"):
+        if isinstance(argv, tuple):
+            argv = list(argv)
+
+        profile = argv.pop(0)[1:]
+        env_files.add(f".env.{profile}")
+
+    if not len(argv):
+        print(f"with-env: no command specified", file=sys.stderr)
+        exit(1)
 
     if watch_for_changes:
         executor = RestartableProgramExecutor(argv, env_files)
