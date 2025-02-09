@@ -64,6 +64,22 @@ class RestartableProgramExecutor(ProgramExecutor):
 
         self.child_pid = None
 
+    @property
+    def running(self):
+        return self.child_pid is not None
+
+    def exited(self):
+        if self.child_pid is None:
+            return None
+
+        pid, status = os.waitpid(self.child_pid, os.WNOHANG)
+
+        if pid == 0:
+            return None
+
+        self.child_pid = None
+        return os.waitstatus_to_exitcode(status)
+
     def start(self):
         if self.child_pid:
             os.kill(self.child_pid, signal.SIGKILL)
