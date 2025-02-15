@@ -65,7 +65,9 @@ class FileObserver:
                     print(f"with-env: program stopped with exit code {exit_code}", file=sys.stderr)
 
                 if self._must_restart:
+                    print(f"with-env: changes detected in env file(s), restarting process...", file=sys.stderr)
                     self._executor.start()
+                    self._must_restart = False
         except KeyboardInterrupt:
             print("with-env: exiting...", file=sys.stderr)
 
