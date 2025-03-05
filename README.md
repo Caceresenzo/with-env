@@ -2,6 +2,12 @@
 
 Start a process with the nearby `.env`!
 
+# Install
+
+```bash
+pip install --upgrade git+https://github.com/Caceresenzo/with-env.git
+```
+
 # Usage
 
 ## Simple
