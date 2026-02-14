@@ -1,6 +1,7 @@
 import os
 import shutil
 import signal
+import subprocess
 import sys
 import typing
 
@@ -46,11 +47,12 @@ class ProgramExecutor:
             exit(1)
 
         try:
-            os.execve(program_path, argv, os.environ)
+            result = subprocess.run(argv, env=os.environ, executable=program_path)
         except BaseException as exception:
             print(f"with-env: {program}: {exception}", file=sys.stderr)
+            exit(1)
 
-        exit(1)
+        exit(result.returncode)
 
 
 class RestartableProgramExecutor(ProgramExecutor):
