@@ -24,22 +24,20 @@ def _remove_duplicates(items: Sequence[str]) -> List[str]:
 @click.command(context_settings={"allow_interspersed_args": False})
 @click.option("--watch", "-w", "watch_for_changes", is_flag=True, help="Watch for changes in the .env and restart the command.")
 @click.option("--file", "-f", "extra_env_files", multiple=True, help="Specify additional .env files to load.")
-@click.argument("argv", nargs=-1)
+@click.option("--profile", "-p", "profiles", multiple=True, help="Specify profiles to load corresponding .env.{profile} files (processed after --file options).")
+@click.argument("argv", nargs=-1, required=True)
 def cli(
     watch_for_changes: bool,
-    extra_env_files: list[str],
-    argv: list[str],
+    extra_env_files: List[str],
+    profiles: List[str],
+    argv: List[str],
 ):
     env_files = [
         ".env",
         *extra_env_files,
     ]
 
-    while len(argv) and argv[0].startswith(":"):
-        if isinstance(argv, tuple):
-            argv = list(argv)
-
-        profile = argv.pop(0)[1:]
+    for profile in profiles:
         env_files.append(f".env.{profile}")
 
     env_files = _remove_duplicates(env_files)

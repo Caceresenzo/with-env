@@ -21,12 +21,12 @@ with-env echo hello
 
 ```bash
 # load `.env` and `.env.prod`
-with-env :prod echo hello
+with-env -p prod echo hello
 ```
 
 ## Watch and restart
 
 ```bash
 # load `.env` and `.env.prod` and restart on updates
-with-env -w :prod echo hello
+with-env -w -p prod echo hello
 ```
