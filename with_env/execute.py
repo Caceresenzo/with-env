@@ -1,19 +1,19 @@
 import os
-import shutil
 import signal
 import subprocess
 import sys
-import typing
+from shutil import which
+from typing import List
 
-import dotenv
+from dotenv import load_dotenv
 
 
 class ProgramExecutor:
 
     def __init__(
         self,
-        argv: typing.List[str],
-        env_files: typing.List[str],
+        argv: List[str],
+        env_files: List[str],
     ):
         self._argv = argv
         self._env_files = env_files
@@ -28,11 +28,11 @@ class ProgramExecutor:
                 print(f"with-env: {env_file}: not found", file=sys.stderr)
                 continue
 
-            has_set_anything = dotenv.load_dotenv(
+            has_set_anything = load_dotenv(
                 env_file,
                 verbose=True,
                 override=True,
-                interpolate=False
+                interpolate=False,
             )
 
             if not has_set_anything:
@@ -41,7 +41,7 @@ class ProgramExecutor:
         argv = self._argv
         program = argv[0]
 
-        program_path = shutil.which(program)
+        program_path = which(program)
         if program_path is None:
             print(f"with-env: {program}: not found", file=sys.stderr)
             exit(1)
@@ -59,8 +59,8 @@ class RestartableProgramExecutor(ProgramExecutor):
 
     def __init__(
         self,
-        argv: typing.List[str],
-        env_files: typing.List[str],
+        argv: List[str],
+        env_files: List[str],
     ):
         super().__init__(argv, env_files)
 

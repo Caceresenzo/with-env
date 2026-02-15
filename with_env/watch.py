@@ -1,22 +1,21 @@
 import os
 import sys
-import threading
-import typing
+from threading import Condition
+from typing import List
 
-import watchdog.events
-import watchdog.observers
-import watchdog.utils
-import watchdog.utils.event_debouncer
+from watchdog.events import FileModifiedEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+from watchdog.utils.event_debouncer import EventDebouncer
 
 from .execute import RestartableProgramExecutor
 
 
-class EventHandler(watchdog.events.FileSystemEventHandler):
+class EventHandler(FileSystemEventHandler):
 
-    def __init__(self, event_debouncer: watchdog.utils.event_debouncer.EventDebouncer):
+    def __init__(self, event_debouncer: EventDebouncer):
         self._event_debouncer = event_debouncer
 
-    def on_modified(self, event: watchdog.events.FileModifiedEvent) -> None:
+    def on_modified(self, event: FileModifiedEvent) -> None:
         self._event_debouncer.handle_event(event)
 
 
@@ -28,11 +27,11 @@ class FileObserver:
     ):
         self._executor = executor
 
-        self._condition = threading.Condition()
+        self._condition = Condition()
         self._program_exit_code = None
         self._must_restart = False
 
-        self._event_debouncer = watchdog.utils.event_debouncer.EventDebouncer(1, self._on_file_changed)
+        self._event_debouncer = EventDebouncer(1, self._on_file_changed)
         self._event_handler = EventHandler(self._event_debouncer)
 
         self._event_debouncer.start()
@@ -44,9 +43,9 @@ class FileObserver:
 
     def run(
         self,
-        env_files: typing.List[str]
+        env_files: List[str]
     ):
-        observer = watchdog.observers.Observer()
+        observer = Observer()
 
         for env_file in env_files:
             if os.path.exists(env_file):
